@@ -2,15 +2,13 @@ package routes
 
 import (
 	"github.com/Skalette1/adminPanel/internal/handlers"
-	"github.com/go-chi/chi/v5"
+	"github.com/gin-gonic/gin"
 )
 
-func RoleRoutes(h *handlers.RoleHandler) chi.Router {
-	r := chi.NewRouter()
-	r.Post("/", h.Create)
-	r.Get("/", h.GetAll)
-	r.Get("/{id}", h.GetByID)
-	r.Put("/{id}", h.Update)
-	r.Delete("/{id}", h.Delete)
-	return r
+func RoleRoutes(r *gin.Engine, h *handlers.RoleHandler) {
+	r.POST("/roles", h.Create)
+	r.GET("/roles", h.GetAll)
+	r.GET("/roles/:id", h.GetByID)
+	r.PUT("/roles/:id", h.Update)
+	r.DELETE("/roles/:id", h.Delete)
 }

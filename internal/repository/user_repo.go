@@ -3,9 +3,10 @@ package repository
 import (
 	"database/sql"
 	"errors"
-	"github.com/Skalette1/adminPanel/internal/models"
 	"log"
 	"time"
+
+	"github.com/Skalette1/adminPanel/internal/models"
 )
 
 type UserRepository struct {
@@ -26,7 +27,7 @@ func (r *UserRepository) CreateUser(user *models.User) (int, error) {
 		INSERT INTO users (username, email, password, role_id, is_active, created_at, updated_at)
 		VALUES ($1,$2,$3,$4,$5,$6,$7)
 		RETURNING id`,
-		user.Username, user.Email, user.Password, user.RoleID, user.IsActive, time.Now(), time.Now(),
+		user.Username, user.Email, user.Password, user.RoleId, user.IsActive, time.Now(), time.Now(),
 	).Scan(&id)
 
 	if err != nil {
@@ -45,7 +46,7 @@ func (r *UserRepository) GetUserByID(id int) (*models.User, error) {
 	err := r.DB.QueryRow(`
 		SELECT id, username, email, password, role_id, is_active, created_at, updated_at
 		FROM users WHERE id=$1`, id).Scan(
-		&user.ID, &user.Username, &user.Email, &user.Password, &user.RoleID,
+		&user.ID, &user.Username, &user.Email, &user.Password, &user.RoleId,
 		&user.IsActive, &user.CreatedAt, &user.UpdatedAt,
 	)
 
@@ -63,7 +64,7 @@ func (r *UserRepository) UpdateUser(user *models.User) error {
 		UPDATE users 
 		SET username=$1, email=$2, password=$3, role_id=$4, is_active=$5, updated_at=$6
 		WHERE id=$7`,
-		user.Username, user.Email, user.Password, user.RoleID, user.IsActive, time.Now(), user.ID,
+		user.Username, user.Email, user.Password, user.RoleId, user.IsActive, time.Now(), user.ID,
 	)
 	return err
 }
@@ -95,7 +96,7 @@ func (r *UserRepository) GetAllUsers() ([]models.User, error) {
 	users := []models.User{}
 	for rows.Next() {
 		var user models.User
-		if err := rows.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.RoleID,
+		if err := rows.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.RoleId,
 			&user.IsActive, &user.CreatedAt, &user.UpdatedAt); err != nil {
 			return nil, err
 		}

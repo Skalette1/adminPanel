@@ -1,0 +1,12 @@
+openapi: 3.0.0
+info:
+  title: Admin Panel API
+  version: "1.0"
+
+paths:
+  /roles:
+    get:
+      summary: Get roles list
+      responses:
+        '200':
+          description: OK

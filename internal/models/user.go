@@ -3,8 +3,7 @@ package models
 import (
 	"database/sql"
 	"errors"
-
-	_ "github.com/Skalette1/adminPanel"
+	//	_ "github.com/Skalette1/adminPanel"
 )
 
 type User struct {

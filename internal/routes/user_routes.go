@@ -1,16 +1,14 @@
 package routes
 
 import (
-	userapi "github.com/Skalette1/adminPanel/internal/handlers"
-	"github.com/go-chi/chi/v5"
+	"github.com/Skalette1/adminPanel/internal/handlers"
+	"github.com/gin-gonic/gin"
 )
 
-func UserRoutes() chi.Router {
-	r := chi.NewRouter()
-	r.Get("/users/{id}", userapi.GetRoleById)
-	r.Get("/users", userapi.GetAllRoles)
-	r.Post("/users", userapi.CreateRole)
-	r.Put("/users/{id}", userapi.UpdateRole)
-	r.Delete("/users{id}", userapi.DeleteRole)
-	return r
+func UserRoutes(r *gin.Engine, h *handlers.UserHandler) {
+	r.POST("/users", h.CreateUserHandler)
+	r.GET("/users", h.GetAllUsersHandler)
+	r.GET("/users/:id", h.GetUserByIDHandler)
+	r.PUT("/users/:id", h.UpdateUserByIDHandler)
+	r.DELETE("/users/:id", h.DeleteUserByIDHandler)
 }
