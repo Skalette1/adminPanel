@@ -1,34 +1,4 @@
-basePath: /
 definitions:
-  dto.ErrorResponse:
-    properties:
-      details:
-        example: status bad request
-        type: string
-      message:
-        example: status bad request
-        type: string
-    type: object
-  dto.SuccessResponse:
-    properties:
-      data: {}
-      message:
-        example: success
-        type: string
-    type: object
-  models.Role:
-    properties:
-      createdAt:
-        type: string
-      id:
-        type: integer
-      permission:
-        type: string
-      updatedAt:
-        type: string
-      username:
-        type: string
-    type: object
   models.User:
     properties:
       created_at:
@@ -48,37 +18,133 @@ definitions:
       username:
         type: string
     type: object
-host: localhost:8080
+  role.CreateRoleRequest:
+    properties:
+      permission:
+        example: full_access
+        type: string
+      username:
+        example: admin
+        type: string
+    required:
+    - username
+    type: object
+  role.RoleErrorResponse:
+    properties:
+      details:
+        example: status bad request
+        type: string
+      message:
+        example: status bad request
+        type: string
+    type: object
+  role.RoleSuccessResponse:
+    properties:
+      created_at:
+        example: "2025-01-01T00:00:00Z"
+        type: string
+      id:
+        example: 1
+        type: integer
+      permission:
+        example: full_access
+        type: string
+      updated_at:
+        example: "2025-01-01T01:00:00Z"
+        type: string
+      username:
+        example: Beslan
+        type: string
+    type: object
+  user.CreateUserRequest:
+    properties:
+      email:
+        example: ivan@example.com
+        type: string
+      password:
+        example: secret
+        type: string
+      role_id:
+        example: 1
+        type: integer
+      username:
+        example: ivan
+        type: string
+    required:
+    - email
+    - password
+    - username
+    type: object
+  user.UserCreatedResponse:
+    properties:
+      id:
+        example: 1
+        type: integer
+    type: object
+  user.UserErrorResponse:
+    properties:
+      details:
+        example: status bad request
+        type: string
+      message:
+        example: status bad request
+        type: string
+    type: object
+  user.UserInternalErrorResponse:
+    properties:
+      message:
+        example: internal server error
+        type: string
+    type: object
+  user.UserNotFoundResponse:
+    properties:
+      message:
+        example: user not found
+        type: string
+    type: object
+  user.UserSuccessResponse:
+    properties:
+      created_at:
+        example: "2025-01-01T00:00:00Z"
+        type: string
+      email:
+        example: dudaev.beslan@bk.ru
+        type: string
+      id:
+        example: 1
+        type: integer
+      is_active:
+        example: true
+        type: boolean
+      role_id:
+        example: 1
+        type: integer
+      updated_at:
+        example: "2025-01-01T01:00:00Z"
+        type: string
+      username:
+        example: beslan
+        type: string
+    type: object
 info:
   contact: {}
-  description: This is an admin panel server.
-  termsOfService: http://swagger.io/terms/
-  title: Admin Panel API
-  version: "1.0"
 paths:
   /roles:
     delete:
       consumes:
       - application/json
       description: Delete role
-      parameters:
-      - description: User object
-        in: body
-        name: user
-        required: true
-        schema:
-          $ref: '#/definitions/models.User'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.SuccessResponse'
+            $ref: '#/definitions/role.RoleSuccessResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/role.RoleErrorResponse'
       summary: Delete role
       tags:
       - roles
@@ -86,49 +152,42 @@ paths:
       consumes:
       - application/json
       description: Get roles
-      parameters:
-      - description: User object
-        in: body
-        name: user
-        required: true
-        schema:
-          $ref: '#/definitions/models.User'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.SuccessResponse'
+            $ref: '#/definitions/role.RoleSuccessResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/role.RoleErrorResponse'
       summary: GetAll roles
       tags:
       - roles
     post:
       consumes:
       - application/json
-      description: Create a new rple
+      description: Create a new role
       parameters:
-      - description: Role object
+      - description: User object
         in: body
-        name: role
+        name: user
         required: true
         schema:
-          $ref: '#/definitions/models.Role'
+          $ref: '#/definitions/role.CreateRoleRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/dto.SuccessResponse'
+            $ref: '#/definitions/role.RoleSuccessResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/role.RoleErrorResponse'
       summary: Create role
       tags:
       - roles
@@ -149,11 +208,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.SuccessResponse'
+            $ref: '#/definitions/role.RoleSuccessResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/role.RoleErrorResponse'
       summary: Update role
       tags:
       - roles
@@ -162,51 +221,45 @@ paths:
       consumes:
       - application/json
       description: Get role by ID
-      parameters:
-      - description: User object
-        in: body
-        name: user
-        required: true
-        schema:
-          $ref: '#/definitions/models.User'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.SuccessResponse'
+            $ref: '#/definitions/role.RoleSuccessResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/role.RoleErrorResponse'
       summary: GetByID role
       tags:
       - roles
   /users:
-    get:
+    delete:
       consumes:
       - application/json
-      description: Get users
-      parameters:
-      - description: User object
-        in: body
-        name: user
-        required: true
-        schema:
-          $ref: '#/definitions/models.User'
+      description: Get user details by ID
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.SuccessResponse'
+            $ref: '#/definitions/user.UserSuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user.UserErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      summary: Get users
+            $ref: '#/definitions/user.UserNotFoundResponse'
+        "501":
+          description: Not Implemented
+          schema:
+            $ref: '#/definitions/user.UserInternalErrorResponse'
+      summary: Get user by ID
       tags:
       - users
     post:
@@ -219,47 +272,30 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/models.User'
+          $ref: '#/definitions/user.CreateUserRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/dto.SuccessResponse'
+            $ref: '#/definitions/user.UserCreatedResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/user.UserErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/user.UserNotFoundResponse'
+        "501":
+          description: Not Implemented
+          schema:
+            $ref: '#/definitions/user.UserInternalErrorResponse'
       summary: Create user
       tags:
       - users
-  /users/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete user details by ID
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/dto.SuccessResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      summary: Delete user by ID
-      tags:
-      - users
-    get:
+    put:
       consumes:
       - application/json
       description: Get user details by ID
@@ -275,36 +311,74 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.SuccessResponse'
+            $ref: '#/definitions/user.UserSuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user.UserErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/user.UserNotFoundResponse'
+        "501":
+          description: Not Implemented
+          schema:
+            $ref: '#/definitions/user.UserInternalErrorResponse'
       summary: Get user by ID
       tags:
       - users
-    put:
+  /users/:
+    get:
       consumes:
       - application/json
-      description: Update user details by ID
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: integer
+      description: Get user details by ID
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.SuccessResponse'
+            $ref: '#/definitions/user.UserSuccessResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      summary: Update user by ID
+            $ref: '#/definitions/user.UserErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/user.UserNotFoundResponse'
+        "501":
+          description: Not Implemented
+          schema:
+            $ref: '#/definitions/user.UserInternalErrorResponse'
+      summary: Get user by ID
+      tags:
+      - users
+  /users/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get user details by ID
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.UserSuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user.UserErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/user.UserNotFoundResponse'
+        "501":
+          description: Not Implemented
+          schema:
+            $ref: '#/definitions/user.UserInternalErrorResponse'
+      summary: Get user by ID
       tags:
       - users
 swagger: "2.0"

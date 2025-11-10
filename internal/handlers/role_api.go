@@ -3,8 +3,9 @@ package handlers
 import (
 	"net/http"
 	"strconv"
+	"time"
 
-	"github.com/Skalette1/adminPanel/internal/dto"
+	roledto "github.com/Skalette1/adminPanel/internal/dto/role"
 	"github.com/Skalette1/adminPanel/internal/models"
 	"github.com/Skalette1/adminPanel/internal/repository"
 	"github.com/gin-gonic/gin"
@@ -18,145 +19,197 @@ func NewRoleHandler(repo *repository.RoleRepository) *RoleHandler {
 	return &RoleHandler{Repo: repo}
 }
 
-// @Create godoc
+// @CreateRoleHandler godoc
 // @Summary Create role
-// @Description Create a new rple
+// @Description Create a new role
 // @Tags roles
 // @Accept json
 // @Produce json
-// @Param role body models.Role true "Role object"
-// @Success 201 {object} dto.SuccessResponse
-// @Failure 400 {object} dto.ErrorResponse
+// @Param user body roledto.CreateRoleRequest true "User object"
+// @Success 201 {object} roledto.RoleSuccessResponse
+// @Failure 400 {object} roledto.RoleErrorResponse
 // @Router /roles [post]
-func (h *RoleHandler) CreateRole(c *gin.Context) {
-	var role models.Role
-	_ = c.BindJSON(&role)
+func (h *RoleHandler) CreateRoleHandler(c *gin.Context) {
+	var req roledto.CreateRoleRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, roledto.RoleErrorResponse{
+			Message: "Invalid request body",
+			Details: err.Error(),
+		})
+		return
+	}
 
-	user, err := h.Repo.Create(role)
+	role := models.Role{
+		Username: req.Username,
+	}
+	if req.Permission != nil {
+		role.Permission = *req.Permission
+	}
+
+	id, err := h.Repo.Create(role)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+		c.JSON(http.StatusInternalServerError, roledto.RoleErrorResponse{
 			Message: "Can not create role",
 			Details: err.Error(),
 		})
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.SuccessResponse{
-		Message: "Created role",
-		Data:    user,
+	created, err := h.Repo.GetByID(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, roledto.RoleErrorResponse{
+			Message: "Role created but could not retrieve",
+			Details: err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusCreated, roledto.RoleSuccessResponse{
+		ID:         id,
+		Username:   created.Username,
+		Permission: created.Permission,
+		CreatedAt:  time.Now(),
 	})
 }
 
-// @Create godoc
+// @GetRoleByIDHandler godoc
 // @Summary GetByID role
 // @Description Get role by ID
 // @Tags roles
 // @Accept json
 // @Produce json
-// @Param user body models.User true "User object"
-// @Success 200 {object} dto.SuccessResponse
-// @Failure 404 {object} dto.ErrorResponse
+// @Success 200 {object} roledto.RoleSuccessResponse
+// @Failure 404 {object} roledto.RoleErrorResponse
 // @Router /roles/{id} [get]
-func (h *RoleHandler) GetRoleByID(c *gin.Context) {
+func (h *RoleHandler) GetRoleByIDHandler(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 
 	role, err := h.Repo.GetByID(id)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+		c.JSON(http.StatusBadRequest, roledto.RoleErrorResponse{
 			Message: "Can not get role",
 			Details: err.Error(),
 		})
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.SuccessResponse{
-		Message: "Get role",
-		Data:    role,
+	c.JSON(http.StatusOK, roledto.RoleSuccessResponse{
+		ID:         role.ID,
+		Username:   role.Username,
+		Permission: role.Permission,
 	})
 }
 
-// @Create godoc
+// @GetAllRolesHandler godoc
 // @Summary GetAll roles
 // @Description Get roles
 // @Tags roles
 // @Accept json
 // @Produce json
-// @Param user body models.User true "User object"
-// @Success 200 {object} dto.SuccessResponse
-// @Failure 404 {object} dto.ErrorResponse
+// @Success 200 {object} roledto.RoleSuccessResponse
+// @Failure 404 {object} roledto.RoleErrorResponse
 // @Router /roles [get]
-func (h *RoleHandler) GetAllRoles(c *gin.Context) {
+func (h *RoleHandler) GetAllRolesHandler(c *gin.Context) {
 	roles, err := h.Repo.GetAll()
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+		c.JSON(http.StatusBadRequest, roledto.RoleErrorResponse{
 			Message: "Can not get all roles",
 			Details: err.Error(),
 		})
 		return
 	}
-	c.JSON(http.StatusOK, dto.SuccessResponse{
-		Message: "Get all roles",
-		Data:    roles,
+	c.JSON(http.StatusOK, roledto.RoleSuccessResponse{
+		ID:         len(roles),
+		Username:   roles[0].Username,
+		Permission: roles[0].Permission,
 	})
 }
 
-// @Create godoc
+// @UpdateRoleHandler godoc
 // @Summary Update role
 // @Description Update role
 // @Tags roles
 // @Accept json
 // @Produce json
 // @Param user body models.User true "User object"
-// @Success 200 {object} dto.SuccessResponse
-// @Failure 400 {object} dto.ErrorResponse
+// @Success 200 {object} roledto.RoleSuccessResponse
+// @Failure 400 {object} roledto.RoleErrorResponse
 // @Router /roles [put]
-func (h *RoleHandler) UpdateRole(c *gin.Context) {
+func (h *RoleHandler) UpdateRoleHandler(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
+	var req roledto.UpdateRoleRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, roledto.RoleErrorResponse{
+			Message: "Invalid request body",
+			Details: err.Error(),
+		})
+		return
+	}
 
-	var role models.Role
-	_ = c.BindJSON(&role)
-
-	err := h.Repo.Update(id, role)
+	existing, err := h.Repo.GetByID(id)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+		c.JSON(http.StatusBadRequest, roledto.RoleErrorResponse{
+			Message: "Role not found",
+			Details: err.Error(),
+		})
+		return
+	}
+
+	if req.Username != nil {
+		existing.Username = *req.Username
+	}
+	if req.Permission != nil {
+		existing.Permission = *req.Permission
+	}
+
+	err = h.Repo.Update(id, *existing)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, roledto.RoleErrorResponse{
 			Message: "Can not update role",
 			Details: err.Error(),
 		})
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.SuccessResponse{
-		Message: "Updated role",
-		Data:    role,
+	updated, err := h.Repo.GetByID(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, roledto.RoleErrorResponse{
+			Message: "Updated but could not retrieve",
+			Details: err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, roledto.RoleSuccessResponse{
+		ID:         id,
+		Username:   updated.Username,
+		Permission: updated.Permission,
+		UpdatedAt:  time.Now(),
 	})
 }
 
-// @Create godoc
+// @DeleteRoleHandler godoc
 // @Summary Delete role
 // @Description Delete role
 // @Tags roles
 // @Accept json
 // @Produce json
-// @Param user body models.User true "User object"
-// @Success 200 {object} dto.SuccessResponse
-// @Failure 400 {object} dto.ErrorResponse
+// @Success 200 {object} roledto.RoleSuccessResponse
+// @Failure 400 {object} roledto.RoleErrorResponse
 // @Router /roles [delete]
-func (h *RoleHandler) DeleteRole(c *gin.Context) {
+func (h *RoleHandler) DeleteRoleHandler(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 
 	err := h.Repo.Delete(id)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+		c.JSON(http.StatusBadRequest, roledto.RoleErrorResponse{
 			Message: "Can not delete role",
 			Details: err.Error(),
 		})
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.SuccessResponse{
-		Message: "Deleted role",
-		Data:    nil,
+	c.JSON(http.StatusOK, roledto.RoleSuccessResponse{
+		ID: id,
 	})
 }
-
-//

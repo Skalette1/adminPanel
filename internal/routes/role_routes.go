@@ -6,9 +6,9 @@ import (
 )
 
 func RoleRoutes(r *gin.Engine, h *handlers.RoleHandler) {
-	r.POST("/roles", h.CreateRole)
-	r.GET("/roles", h.GetAllRoles)
-	r.GET("/roles/:id", h.GetRoleByID)
-	r.PUT("/roles/:id", h.UpdateRole)
-	r.DELETE("/roles/:id", h.DeleteRole)
+	r.POST("/", h.CreateRoleHandler)
+	r.GET("/", h.GetAllRolesHandler)
+	r.GET("/{id}", h.GetRoleByIDHandler)
+	r.PUT("/{id}", h.UpdateRoleHandler)
+	r.DELETE("/{id}", h.DeleteRoleHandler)
 }

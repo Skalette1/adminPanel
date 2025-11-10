@@ -1,46 +1,36 @@
-// @title Admin Panel API
-// @version 1.0
-// @description API для работы с пользователями и ролями.
-// @host localhost:8080
-// @BasePath /
 package main
 
 import (
 	"log"
 
-	_ "github.com/Skalette1/adminPanel/docs" // This line is important
+	_ "github.com/Skalette1/adminPanel/docs"
 	"github.com/Skalette1/adminPanel/internal/db"
 	"github.com/Skalette1/adminPanel/internal/handlers"
 	"github.com/Skalette1/adminPanel/internal/repository"
-	"github.com/Skalette1/adminPanel/internal/routes"
-	"github.com/gin-gonic/gin"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
+	routes "github.com/Skalette1/adminPanel/internal/routes"
+	_ "github.com/lib/pq"
 )
 
-// @title Admin Panel API
-// @version 1.0
-// @description This is an admin panel server.
-// @termsOfService http://swagger.io/terms/
-
 func main() {
+	// Подключение к базе данных
 	database, err := db.ConnectDB()
 	if err != nil {
 		log.Fatalf("db connect: %v", err)
 	}
+	defer database.Close()
 
+	// Создание репозиториев
 	roleRepo := repository.NewRoleRepository(database)
 	userRepo := repository.NewUserRepository(database)
 
+	// Создание обработчиков
 	roleHandler := handlers.NewRoleHandler(roleRepo)
 	userHandler := handlers.NewUserHandler(userRepo)
 
-	r := gin.Default()
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	// Инициализация роутера
+	r := routes.InitRouter(userHandler, roleHandler)
 
-	routes.RoleRoutes(r, roleHandler)
-	routes.UserRoutes(r, userHandler)
-
+	// Запуск сервера
 	if err := r.Run(":8080"); err != nil {
 		log.Fatalf("server error: %v", err)
 	}
